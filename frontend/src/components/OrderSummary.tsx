@@ -397,11 +397,11 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
                                 return `
                                 <tr>
                                     <td><strong>${index + 1}</strong></td>
-                                    <td><strong>${item.productName}</strong></td>
+                                    <td><strong>${item.name || item.productName}</strong></td>
                                     <td><code>${item.sku}</code></td>
                                     <td><strong>${item.quantity}</strong></td>
-                                    <td>$${(item.unitPrice || 0).toFixed(2)}</td>
-                                    <td><strong>$${(item.totalPrice || 0).toFixed(2)}</strong></td>
+                                    <td>$${(item.price || item.unitPrice || 0).toFixed(2)}</td>
+                                    <td><strong>$${(item.subtotal || item.totalPrice || 0).toFixed(2)}</strong></td>
                                     <td>
                                         <div class="confidence-bar">
                                             <div class="confidence-fill ${confidenceClass}" style="width: ${confidence}%"></div>
@@ -628,7 +628,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
                       {index + 1}
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-slate-900 text-lg mb-1">{item.productName}</h4>
+                      <h4 className="font-bold text-slate-900 text-lg mb-1">{item.name || item.productName}</h4>
                       <div className="text-slate-600 text-sm mb-2">SKU: {item.sku}</div>
                       <div className="flex flex-wrap gap-4 text-sm">
                         <div className="flex items-center gap-2">
@@ -637,11 +637,11 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-slate-500">Unit Price:</span>
-                          <span className="font-semibold text-green-700">${item.unitPrice?.toFixed(2) || '0.00'}</span>
+                          <span className="font-semibold text-green-700">${(item.price || item.unitPrice || 0).toFixed(2)}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-slate-500">Total:</span>
-                          <span className="font-bold text-green-800">${item.totalPrice?.toFixed(2) || '0.00'}</span>
+                          <span className="font-bold text-green-800">${(item.subtotal || item.totalPrice || 0).toFixed(2)}</span>
                         </div>
                       </div>
                     </div>

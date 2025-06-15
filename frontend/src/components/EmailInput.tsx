@@ -10,6 +10,8 @@ const SAMPLE_EMAILS = [
   {
     id: 1,
     title: "John's Apartment Order",
+    subtitle: "Mixed format with quantities",
+    icon: "🏠",
     content: `Hey there,
 
 I'm moving into a new apartment and need to place an order. Could you get these to me by June 20, 2025?
@@ -29,6 +31,8 @@ John Smith`
   {
     id: 2,
     title: "Lena's Quote Request",
+    subtitle: "Formal business email",
+    icon: "💼",
     content: `To whom it may concern,
 
 Please prepare a quote and availability for the following items, with quantities indicated:
@@ -45,6 +49,8 @@ Lena Müller`
   {
     id: 3,
     title: "Carlos's Stock Check",
+    subtitle: "International with alternatives",
+    icon: "🌍",
     content: `Hello team,
 
 Can you help me confirm if you have these in stock and can ship them before June 22, 2025?
@@ -67,6 +73,8 @@ Carlos Ramirez`
   {
     id: 4,
     title: "Fatima's Urgent Order",
+    subtitle: "Urgent delivery requirements",
+    icon: "⚡",
     content: `Hi,
 
 I'd like to buy the following items urgently:
@@ -83,6 +91,8 @@ Fatima Al-Sayeed`
   {
     id: 5,
     title: "Yuki's Procurement",
+    subtitle: "Japanese customer formatting",
+    icon: "🏯",
     content: `Greetings,
 
 Following up on our conversation – I've shortlisted the products below for procurement:
@@ -117,31 +127,53 @@ export const EmailInput: React.FC<EmailInputProps> = ({ onSubmit, isLoading }) =
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">📧 Email Input</h2>
+    <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white text-lg">
+            📧
+          </div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            Email Input
+          </h2>
+        </div>
         <button
           type="button"
           onClick={() => setShowSamples(!showSamples)}
-          className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium"
         >
-          {showSamples ? 'Hide' : 'Show'} Sample Emails
+          {showSamples ? '🔼 Hide' : '🔽 Show'} Sample Emails
         </button>
       </div>
 
       {showSamples && (
-        <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">📋 Sample Emails from Zaqathon:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="mb-8 p-6 bg-gradient-to-br from-slate-50/80 to-blue-50/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 animate-in slide-in-from-top duration-300">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xl">📋</span>
+            <h3 className="font-semibold text-slate-800">Sample Emails from Zaqathon Challenge</h3>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {SAMPLE_EMAILS.map((sample) => (
               <button
                 key={sample.id}
                 onClick={() => loadSampleEmail(sample)}
-                className="p-2 text-left text-sm bg-white border border-gray-200 rounded hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                className="group p-4 text-left bg-white/80 backdrop-blur-sm border border-white/40 rounded-xl hover:border-blue-300/60 hover:bg-blue-50/80 transition-all duration-300 shadow-sm hover:shadow-lg transform hover:scale-[1.02]"
               >
-                <div className="font-medium text-gray-800">{sample.title}</div>
-                <div className="text-gray-500 text-xs mt-1">
-                  {sample.content.substring(0, 50)}...
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl group-hover:scale-110 transition-transform duration-300">
+                    {sample.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-slate-800 group-hover:text-blue-800 transition-colors">
+                      {sample.title}
+                    </div>
+                    <div className="text-slate-600 text-sm mb-2">
+                      {sample.subtitle}
+                    </div>
+                    <div className="text-slate-500 text-xs leading-relaxed">
+                      {sample.content.substring(0, 80)}...
+                    </div>
+                  </div>
                 </div>
               </button>
             ))}
@@ -149,17 +181,18 @@ export const EmailInput: React.FC<EmailInputProps> = ({ onSubmit, isLoading }) =
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-            Paste customer email content:
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-3">
+            📝 Paste customer email content:
           </label>
-          <textarea
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-64 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm"
-            placeholder="Paste the raw email content here...
+          <div className="relative">
+            <textarea
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full h-80 p-4 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 resize-none font-mono text-sm bg-white/50 backdrop-blur-sm placeholder-slate-400 shadow-inner"
+              placeholder="Paste the raw email content here...
 
 Example:
 Hey there,
@@ -169,32 +202,68 @@ I need to order:
 
 Ship to: John Doe, 123 Main St, City
 Thanks!"
-            required
-          />
+              required
+            />
+            {email && (
+              <div className="absolute top-3 right-3 bg-green-100 text-green-800 px-2 py-1 rounded-lg text-xs font-medium">
+                {email.length} characters
+              </div>
+            )}
+          </div>
         </div>
         
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-500">
-            💡 Tip: Try one of the sample emails above or paste your own messy customer email
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-2 text-sm text-slate-600 bg-blue-50/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-blue-200/50">
+            <span className="text-lg">💡</span>
+            <span>Try one of the sample emails above or paste your own messy customer email</span>
           </div>
           <button
             type="submit"
             disabled={isLoading || !email.trim()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:shadow-none"
           >
             {isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Processing...
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                <span>Processing...</span>
               </>
             ) : (
               <>
-                🚀 Process Email
+                <span className="text-lg">🚀</span>
+                <span>Process Email</span>
               </>
             )}
           </button>
         </div>
       </form>
+
+      {/* Processing Steps Indicator */}
+      {isLoading && (
+        <div className="mt-6 p-4 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm rounded-xl border border-blue-200/50 animate-in slide-in-from-bottom duration-300">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+            <span className="font-medium text-blue-900">AI Processing Steps</span>
+          </div>
+          <div className="space-y-2 text-sm text-blue-800">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+              <span>Analyzing email structure and content</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse delay-200"></div>
+              <span>Extracting products, quantities, and customer info</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse delay-500"></div>
+              <span>Validating against product catalog</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse delay-700"></div>
+              <span>Checking inventory and calculating prices</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }; 

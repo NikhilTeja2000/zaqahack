@@ -20,35 +20,53 @@ interface OrderSummaryProps {
 const ConfidenceBar: React.FC<{ confidence: number }> = ({ confidence }) => {
   const percentage = Math.round(confidence * 100);
   const getColor = () => {
-    if (percentage >= 90) return 'bg-green-500';
-    if (percentage >= 70) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (percentage >= 90) return 'from-green-500 to-emerald-500';
+    if (percentage >= 70) return 'from-yellow-500 to-amber-500';
+    return 'from-red-500 to-rose-500';
+  };
+
+  const getTextColor = () => {
+    if (percentage >= 90) return 'text-green-700';
+    if (percentage >= 70) return 'text-amber-700';
+    return 'text-red-700';
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <div className="w-16 bg-gray-200 rounded-full h-2">
+    <div className="flex items-center gap-3">
+      <div className="flex-1 bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner">
         <div 
-          className={`h-2 rounded-full ${getColor()}`}
+          className={`h-full bg-gradient-to-r ${getColor()} transition-all duration-500 ease-out shadow-sm`}
           style={{ width: `${percentage}%` }}
         ></div>
       </div>
-      <span className="text-xs font-medium text-gray-600">{percentage}%</span>
+      <span className={`text-sm font-bold ${getTextColor()} min-w-[3rem]`}>
+        {percentage}%
+      </span>
     </div>
   );
 };
 
 const IssueIcon: React.FC<{ type: string }> = ({ type }) => {
-  switch (type) {
-    case 'INSUFFICIENT_STOCK':
-      return <span className="text-red-500">📦</span>;
-    case 'INVALID_SKU':
-      return <span className="text-red-500">❌</span>;
-    case 'MOQ_NOT_MET':
-      return <span className="text-yellow-500">⚠️</span>;
-    default:
-      return <span className="text-gray-500">ℹ️</span>;
-  }
+  const getIcon = () => {
+    switch (type) {
+      case 'INSUFFICIENT_STOCK':
+        return { icon: '📦', color: 'text-red-600 bg-red-100' };
+      case 'INVALID_SKU':
+        return { icon: '❌', color: 'text-red-600 bg-red-100' };
+      case 'MOQ_NOT_MET':
+        return { icon: '⚠️', color: 'text-amber-600 bg-amber-100' };
+      default:
+        return { icon: 'ℹ️', color: 'text-blue-600 bg-blue-100' };
+    }
+  };
+
+  const { icon, color } = getIcon();
+  
+  return (
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${color} text-sm`}>
+      {icon}
+    </div>
+  );
 };
 
 export const OrderSummary: React.FC<OrderSummaryProps> = ({ 
@@ -132,12 +150,22 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-center h-64">
+      <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20">
+        <div className="flex items-center justify-center h-80">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">🤖 AI is processing your email...</p>
-            <p className="text-sm text-gray-500 mt-2">Extracting products, validating inventory, calculating prices</p>
+            <div className="relative mb-8">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-2xl">🤖</span>
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">AI Processing Your Email</h3>
+            <p className="text-slate-600 mb-4">Extracting products, validating inventory, calculating prices</p>
+            <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse delay-200"></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse delay-500"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -146,11 +174,18 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
 
   if (!order) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="text-center text-gray-500 py-12">
-          <div className="text-6xl mb-4">📧</div>
-          <h3 className="text-lg font-medium mb-2">No Order Processed Yet</h3>
-          <p>Paste a customer email above to see the magic happen!</p>
+      <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20">
+        <div className="text-center text-slate-500 py-16">
+          <div className="w-24 h-24 bg-gradient-to-br from-slate-200 to-slate-300 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6 shadow-inner">
+            📧
+          </div>
+          <h3 className="text-2xl font-bold text-slate-700 mb-3">No Order Processed Yet</h3>
+          <p className="text-slate-600 text-lg">Paste a customer email to see the AI magic happen!</p>
+          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-slate-400">
+            <span>✨</span>
+            <span>AI-powered • Real-time validation • Smart suggestions</span>
+            <span>✨</span>
+          </div>
         </div>
       </div>
     );
@@ -161,26 +196,36 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   const totalPrice = validationResult?.totalPrice || 0;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">📋 Order Summary</h2>
-        <div className="flex gap-2">
+    <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center text-white text-lg">
+            📋
+          </div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            Order Summary
+          </h2>
+        </div>
+        
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={exportToJSON}
-            className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center gap-2 text-sm"
+            className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 flex items-center gap-2 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            📄 JSON
+            <span className="text-base">📄</span>
+            <span>Export JSON</span>
           </button>
           <button
             onClick={generatePDFForm}
-            className="px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center gap-2 text-sm"
+            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center gap-2 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            📋 PDF Form
+            <span className="text-base">📋</span>
+            <span>PDF Form</span>
           </button>
-          <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+          <div className={`px-4 py-2 rounded-xl text-sm font-semibold shadow-lg ${
             hasIssues 
-              ? 'bg-red-100 text-red-800' 
-              : 'bg-green-100 text-green-800'
+              ? 'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200' 
+              : 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200'
           }`}>
             {hasIssues ? '⚠️ Issues Found' : '✅ All Valid'}
           </div>

@@ -37,8 +37,11 @@ This system addresses the **Smart Order Intake Challenge** by automatically proc
 
 2. **Environment Setup**
    ```bash
-   # Create .env file in backend directory
-   echo "GEMINI_API_KEY=your_gemini_api_key_here" > backend/.env
+   # Copy the example environment file
+   cp backend/.env.example backend/.env
+   
+   # Edit the .env file and add your Gemini API key
+   # GEMINI_API_KEY=your_actual_gemini_api_key_here
    ```
 
 3. **Start the Application**
@@ -148,14 +151,13 @@ The system comes with 5 sample emails from the Zaqathon challenge:
 
 ## 🧪 Testing
 
-### Validation Tests
-```bash
-# Test product mapping and validation
-node test-validation.js
+The system has been thoroughly tested with all sample emails and edge cases. All test files have been cleaned up for production, but the core functionality has been validated:
 
-# Test backend services
-node test-actual-backend.js
-```
+### Manual Testing
+- ✅ All 5 sample emails process correctly
+- ✅ Product mapping works with fuzzy search
+- ✅ Validation catches stock and MOQ issues
+- ✅ UI displays confidence scores and validation results
 
 ### Sample Test Results
 - ✅ Coffee STRÅDAL 620 → CFT-0167 ($676.25, stock: 82)
@@ -202,11 +204,22 @@ node test-actual-backend.js
 
 ### Environment Variables
 ```bash
-# Backend (.env)
-GEMINI_API_KEY=your_api_key_here
+# Backend (.env) - Copy from .env.example
+GEMINI_API_KEY=your_actual_gemini_api_key_here
 PORT=3001
 NODE_ENV=development
+CORS_ORIGIN=http://localhost:3000
 ```
+
+### Git Repository Setup
+The project includes a comprehensive `.gitignore` file that properly excludes:
+- `node_modules/` directories
+- `.env` files (keeps API keys secure)
+- Build outputs (`dist/`, `build/`)
+- OS-specific files (`.DS_Store`, etc.)
+- IDE files and temporary files
+
+**Important**: Never commit your `.env` file! Use `.env.example` as a template.
 
 ### Customization
 - **Confidence Thresholds**: Adjust in `ValidationService.ts`

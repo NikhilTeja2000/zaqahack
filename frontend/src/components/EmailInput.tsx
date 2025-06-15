@@ -127,8 +127,8 @@ export const EmailInput: React.FC<EmailInputProps> = ({ onSubmit, isLoading }) =
   };
 
   return (
-    <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20">
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/20">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white text-lg">
             📧
@@ -140,38 +140,38 @@ export const EmailInput: React.FC<EmailInputProps> = ({ onSubmit, isLoading }) =
         <button
           type="button"
           onClick={() => setShowSamples(!showSamples)}
-          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium"
+          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium text-sm"
         >
           {showSamples ? '🔼 Hide' : '🔽 Show'} Sample Emails
         </button>
       </div>
 
       {showSamples && (
-        <div className="mb-8 p-6 bg-gradient-to-br from-slate-50/80 to-blue-50/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 animate-in slide-in-from-top duration-300">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl">📋</span>
+        <div className="mb-6 p-4 bg-gradient-to-br from-slate-50/80 to-blue-50/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 animate-in slide-in-from-top duration-300">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">📋</span>
             <h3 className="font-semibold text-slate-800">Sample Emails from Zaqathon Challenge</h3>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {SAMPLE_EMAILS.map((sample) => (
               <button
                 key={sample.id}
                 onClick={() => loadSampleEmail(sample)}
-                className="group p-4 text-left bg-white/80 backdrop-blur-sm border border-white/40 rounded-xl hover:border-blue-300/60 hover:bg-blue-50/80 transition-all duration-300 shadow-sm hover:shadow-lg transform hover:scale-[1.02]"
+                className="group p-3 text-left bg-white/80 backdrop-blur-sm border border-white/40 rounded-xl hover:border-blue-300/60 hover:bg-blue-50/80 transition-all duration-300 shadow-sm hover:shadow-lg transform hover:scale-[1.02]"
               >
-                <div className="flex items-start gap-3">
-                  <div className="text-2xl group-hover:scale-110 transition-transform duration-300">
+                <div className="flex items-start gap-2">
+                  <div className="text-xl group-hover:scale-110 transition-transform duration-300">
                     {sample.icon}
                   </div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-slate-800 group-hover:text-blue-800 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-slate-800 group-hover:text-blue-800 transition-colors text-sm truncate">
                       {sample.title}
                     </div>
-                    <div className="text-slate-600 text-sm mb-2">
+                    <div className="text-slate-600 text-xs mb-1">
                       {sample.subtitle}
                     </div>
-                    <div className="text-slate-500 text-xs leading-relaxed">
-                      {sample.content.substring(0, 80)}...
+                    <div className="text-slate-500 text-xs leading-relaxed line-clamp-2">
+                      {sample.content.substring(0, 60)}...
                     </div>
                   </div>
                 </div>
@@ -181,9 +181,9 @@ export const EmailInput: React.FC<EmailInputProps> = ({ onSubmit, isLoading }) =
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-3">
+          <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
             📝 Paste customer email content:
           </label>
           <div className="relative">
@@ -191,7 +191,7 @@ export const EmailInput: React.FC<EmailInputProps> = ({ onSubmit, isLoading }) =
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-80 p-4 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 resize-none font-mono text-sm bg-white/50 backdrop-blur-sm placeholder-slate-400 shadow-inner"
+              className="w-full h-64 p-4 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 resize-none font-mono text-sm bg-white/50 backdrop-blur-sm placeholder-slate-400 shadow-inner"
               placeholder="Paste the raw email content here...
 
 Example:
@@ -206,21 +206,21 @@ Thanks!"
             />
             {email && (
               <div className="absolute top-3 right-3 bg-green-100 text-green-800 px-2 py-1 rounded-lg text-xs font-medium">
-                {email.length} characters
+                {email.length} chars
               </div>
             )}
           </div>
         </div>
         
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-2 text-sm text-slate-600 bg-blue-50/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-blue-200/50">
-            <span className="text-lg">💡</span>
-            <span>Try one of the sample emails above or paste your own messy customer email</span>
+          <div className="flex items-center gap-2 text-sm text-slate-600 bg-blue-50/80 backdrop-blur-sm px-3 py-2 rounded-xl border border-blue-200/50">
+            <span className="text-base">💡</span>
+            <span>Try sample emails above or paste your own customer email</span>
           </div>
           <button
             type="submit"
             disabled={isLoading || !email.trim()}
-            className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:shadow-none"
+            className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:shadow-none"
           >
             {isLoading ? (
               <>
@@ -239,27 +239,27 @@ Thanks!"
 
       {/* Processing Steps Indicator */}
       {isLoading && (
-        <div className="mt-6 p-4 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm rounded-xl border border-blue-200/50 animate-in slide-in-from-bottom duration-300">
-          <div className="flex items-center gap-2 mb-3">
+        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm rounded-xl border border-blue-200/50 animate-in slide-in-from-bottom duration-300">
+          <div className="flex items-center gap-2 mb-2">
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
-            <span className="font-medium text-blue-900">AI Processing Steps</span>
+            <span className="font-medium text-blue-900 text-sm">AI Processing Steps</span>
           </div>
-          <div className="space-y-2 text-sm text-blue-800">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-blue-800">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
-              <span>Analyzing email structure and content</span>
+              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
+              <span>Analyzing email structure</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse delay-200"></div>
-              <span>Extracting products, quantities, and customer info</span>
+              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse delay-200"></div>
+              <span>Extracting products & quantities</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse delay-500"></div>
-              <span>Validating against product catalog</span>
+              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse delay-500"></div>
+              <span>Validating against catalog</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse delay-700"></div>
-              <span>Checking inventory and calculating prices</span>
+              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse delay-700"></div>
+              <span>Calculating prices & inventory</span>
             </div>
           </div>
         </div>

@@ -80,7 +80,7 @@ function App() {
 
       {/* Header */}
       <header className="relative bg-white/80 backdrop-blur-lg shadow-lg border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
             <div className="text-center lg:text-left">
               <div className="flex items-center justify-center lg:justify-start gap-3 mb-2">
@@ -127,16 +127,16 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {/* Left Column - Email Input */}
-          <div className="space-y-8">
+      {/* Main Content - Now Vertical Layout */}
+      <main className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="space-y-8">
+          {/* Email Input Section - Top */}
+          <div>
             <EmailInput onSubmit={handleEmailSubmit} isLoading={isLoading} />
             
             {/* Error Display */}
             {error && (
-              <div className="bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-2xl p-6 shadow-lg animate-in slide-in-from-top duration-300">
+              <div className="mt-6 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-2xl p-6 shadow-lg animate-in slide-in-from-top duration-300">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
                     <span className="text-red-600 text-lg">❌</span>
@@ -154,14 +154,14 @@ function App() {
             )}
 
             {/* Enhanced System Info */}
-            <div className="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-6 shadow-lg">
+            <div className="mt-6 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-6 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white text-lg">
                   🎯
                 </div>
                 <h3 className="font-semibold text-blue-900 text-lg">System Capabilities</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 <div className="flex items-center gap-2 text-blue-800">
                   <span className="text-green-500">✅</span>
                   <span className="text-sm">Extracts products & quantities</span>
@@ -190,7 +190,7 @@ function App() {
             </div>
           </div>
 
-          {/* Right Column - Order Summary */}
+          {/* Order Summary Section - Bottom */}
           <div>
             <OrderSummary 
               order={order} 
@@ -206,7 +206,7 @@ function App() {
             <h2 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
               Powered by Advanced AI Technology
             </h2>
-            <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+            <p className="text-slate-600 text-lg max-w-3xl mx-auto">
               Transform messy customer emails into structured, validated orders with cutting-edge AI and smart validation
             </p>
           </div>
@@ -277,7 +277,7 @@ function App() {
 
       {/* Enhanced Footer */}
       <footer className="relative bg-white/80 backdrop-blur-lg border-t border-white/20 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
               <span className="text-2xl">🏆</span>

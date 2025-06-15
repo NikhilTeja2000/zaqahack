@@ -103,48 +103,395 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const generatePDFForm = async () => {
+  const generateDetailedPDFView = () => {
     if (!order || !validationResult) return;
     
-    try {
-      const response = await fetch('/api/generate-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          parsedOrder: order,
-          validationResult: validationResult
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        // Download the PDF form data as JSON (in a real app, this would be a PDF)
-        const blob = new Blob([JSON.stringify(data.data.formData, null, 2)], {
-          type: 'application/json'
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `sales-order-form-${Date.now()}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+    const currentDate = new Date().toLocaleDateString();
+    const currentTime = new Date().toLocaleTimeString();
+    const hasIssues = validationResult.issues.length > 0;
+    
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Order Intake - Detailed Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        alert('📄 PDF Form data generated! In production, this would be a filled PDF form.');
-      } else {
-        throw new Error(data.error || 'Failed to generate PDF form');
-      }
-    } catch (error) {
-      console.error('Error generating PDF form:', error);
-      alert('❌ Failed to generate PDF form. Please try again.');
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #4299e1;
+        }
+        
+        .info-card h4 {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .info-card p {
+            color: #4a5568;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        
+        tr:hover {
+            background: #f7fafc;
+        }
+        
+        .confidence-bar {
+            width: 100px;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 4px 0;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .confidence-high { background: linear-gradient(90deg, #48bb78, #38a169); }
+        .confidence-medium { background: linear-gradient(90deg, #ed8936, #dd6b20); }
+        .confidence-low { background: linear-gradient(90deg, #f56565, #e53e3e); }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-warning {
+            background: #faf089;
+            color: #744210;
+        }
+        
+        .status-error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .issues-section {
+            background: #fef5e7;
+            border: 1px solid #f6ad55;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .issue-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #f56565;
+        }
+        
+        .issue-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .total-section {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .total-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .footer {
+            background: #f7fafc;
+            padding: 20px 30px;
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; }
+            .header { background: #667eea !important; }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .content { padding: 20px; }
+            .info-grid { grid-template-columns: 1fr; }
+            table { font-size: 0.8rem; }
+            th, td { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Smart Order Intake System</h1>
+            <p>AI-Powered Email Processing • Detailed Order Report</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">Generated on ${currentDate} at ${currentTime}</p>
+        </div>
+        
+        <div class="content">
+            <!-- Customer Information Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span>👤</span>
+                    Customer Information
+                </h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4>Customer Name</h4>
+                        <p>${order.customerInfo.name || 'Not provided'}</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Email Address</h4>
+                        <p>${order.customerInfo.email || 'Not provided'}</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Delivery Address</h4>
+                        <p>${order.customerInfo.deliveryAddress || 'Not provided'}</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Requested Delivery Date</h4>
+                        <p>${order.customerInfo.deliveryDate || 'Not specified'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Items Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span>📦</span>
+                    Order Items (${validationResult.validItems.length} items)
+                </h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Product Name</th>
+                                <th>SKU</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Price</th>
+                                <th>AI Confidence</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${validationResult.validItems.map((item: any, index: number) => {
+                                const confidence = Math.round((item.confidence || 0.8) * 100);
+                                const confidenceClass = confidence >= 90 ? 'confidence-high' : confidence >= 70 ? 'confidence-medium' : 'confidence-low';
+                                return `
+                                <tr>
+                                    <td><strong>${index + 1}</strong></td>
+                                    <td><strong>${item.productName}</strong></td>
+                                    <td><code>${item.sku}</code></td>
+                                    <td><strong>${item.quantity}</strong></td>
+                                    <td>$${(item.unitPrice || 0).toFixed(2)}</td>
+                                    <td><strong>$${(item.totalPrice || 0).toFixed(2)}</strong></td>
+                                    <td>
+                                        <div class="confidence-bar">
+                                            <div class="confidence-fill ${confidenceClass}" style="width: ${confidence}%"></div>
+                                        </div>
+                                        <small>${confidence}%</small>
+                                    </td>
+                                    <td><span class="status-badge status-success">✅ Valid</span></td>
+                                </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            ${hasIssues ? `
+            <!-- Issues Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span>⚠️</span>
+                    Validation Issues (${validationResult.issues.length})
+                </h2>
+                <div class="issues-section">
+                    ${validationResult.issues.map((issue: any) => `
+                        <div class="issue-item">
+                            <h4 style="color: #742a2a; margin-bottom: 8px;">
+                                ${issue.type === 'INSUFFICIENT_STOCK' ? '📦' : issue.type === 'INVALID_SKU' ? '❌' : '⚠️'} 
+                                ${issue.message}
+                            </h4>
+                            ${issue.suggestion ? `<p style="color: #4a5568;"><strong>💡 Suggestion:</strong> ${issue.suggestion}</p>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            ` : ''}
+            
+            <!-- Order Summary -->
+            <div class="total-section">
+                <h2 style="margin-bottom: 20px;">Order Summary</h2>
+                <div class="total-amount">$${validationResult.totalPrice.toFixed(2)}</div>
+                <p style="font-size: 1.2rem; margin-bottom: 20px;">Total Order Value</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; text-align: center;">
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 600;">${validationResult.validItems.length}</div>
+                        <div>Total Items</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 600;">${hasIssues ? validationResult.issues.length : 0}</div>
+                        <div>Issues Found</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 600;">
+                            ${Math.round(validationResult.validItems.reduce((sum: number, item: any) => sum + (item.confidence || 0.8), 0) / validationResult.validItems.length * 100)}%
+                        </div>
+                        <div>Avg Confidence</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 600;">${hasIssues ? '⚠️ Review' : '✅ Ready'}</div>
+                        <div>Order Status</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>🏆 Smart Order Intake System</strong> • Zaqathon Hackathon • AI-Powered Email Processing</p>
+            <p style="margin-top: 5px;">Powered by React • TypeScript • Node.js • Gemini AI</p>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-print dialog for easy PDF saving
+        window.onload = function() {
+            setTimeout(() => {
+                if (confirm('Would you like to save this report as PDF?\\n\\nClick OK to open print dialog, then choose "Save as PDF"')) {
+                    window.print();
+                }
+            }, 1000);
+        };
+    </script>
+</body>
+</html>`;
+
+    // Open in new window
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(htmlContent);
+      newWindow.document.close();
+    } else {
+      alert('Please allow popups to view the detailed report!');
     }
   };
 
@@ -216,11 +563,11 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
             <span>Export JSON</span>
           </button>
           <button
-            onClick={generatePDFForm}
+            onClick={generateDetailedPDFView}
             className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center gap-2 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             <span className="text-base">📋</span>
-            <span>PDF Form</span>
+            <span>Detailed Report</span>
           </button>
           <div className={`px-4 py-2 rounded-xl text-sm font-semibold shadow-lg ${
             hasIssues 
@@ -233,65 +580,78 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
       </div>
 
       {/* Customer Information */}
-      <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-        <h3 className="font-semibold text-blue-900 mb-2">👤 Customer Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="font-medium">Email:</span> {order.customerInfo.email || 'Not provided'}
+      <div className="mb-8 p-6 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 backdrop-blur-sm rounded-2xl border border-blue-200/50">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white text-sm">
+            👤
           </div>
-          <div>
-            <span className="font-medium">Name:</span> {order.customerInfo.name || 'Not provided'}
-          </div>
-                     <div className="md:col-span-2">
-             <span className="font-medium">Address:</span> {order.customerInfo.deliveryAddress || 'Not provided'}
-           </div>
-          {order.customerInfo.deliveryDate && (
-            <div>
-              <span className="font-medium">Delivery Date:</span> {order.customerInfo.deliveryDate}
+          <h3 className="font-bold text-blue-900 text-lg">Customer Information</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/40">
+            <div className="text-sm text-slate-600 mb-1">Email Address</div>
+            <div className="font-semibold text-slate-800">
+              {order.customerInfo.email || 'Not provided'}
             </div>
-          )}
+          </div>
+          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/40">
+            <div className="text-sm text-slate-600 mb-1">Customer Name</div>
+            <div className="font-semibold text-slate-800">
+              {order.customerInfo.name || 'Not provided'}
+            </div>
+          </div>
+          <div className="md:col-span-2 bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/40">
+            <div className="text-sm text-slate-600 mb-1">Delivery Address</div>
+            <div className="font-semibold text-slate-800">
+              {order.customerInfo.deliveryAddress || 'Not provided'}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Order Items */}
-      <div className="mb-6">
-        <h3 className="font-semibold text-gray-900 mb-4">🛍️ Order Items ({totalItems})</h3>
-        <div className="space-y-3">
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center text-white text-sm">
+            📦
+          </div>
+          <h3 className="font-bold text-slate-900 text-lg">Order Items ({totalItems})</h3>
+        </div>
+        
+        <div className="space-y-4">
           {validationResult?.validItems?.map((item: any, index: number) => (
-            <div key={index} className="border border-gray-200 rounded-lg p-4">
-              <div className="flex justify-between items-start mb-2">
+            <div key={index} className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/40 hover:shadow-lg transition-all duration-300">
+              <div className="flex flex-col lg:flex-row justify-between gap-4">
                 <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">{item.name}</h4>
-                  <p className="text-sm text-gray-600">SKU: {item.sku}</p>
-                </div>
-                <div className="text-right">
-                  <div className="font-semibold text-lg">${item.subtotal.toFixed(2)}</div>
-                  <div className="text-sm text-gray-600">${item.price} × {item.quantity}</div>
-                </div>
-              </div>
-              
-              <div className="flex justify-between items-center mt-3">
-                <div className="flex items-center gap-4">
-                  <div className="text-sm">
-                    <span className="font-medium">Stock:</span> {item.stock}
-                    {item.stock >= item.quantity ? (
-                      <span className="text-green-600 ml-1">✅</span>
-                    ) : (
-                      <span className="text-red-600 ml-1">❌</span>
-                    )}
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-slate-200 to-slate-300 rounded-xl flex items-center justify-center text-slate-600 font-bold text-lg shadow-inner">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-slate-900 text-lg mb-1">{item.productName}</h4>
+                      <div className="text-slate-600 text-sm mb-2">SKU: {item.sku}</div>
+                      <div className="flex flex-wrap gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-500">Quantity:</span>
+                          <span className="font-semibold text-slate-800">{item.quantity}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-500">Unit Price:</span>
+                          <span className="font-semibold text-green-700">${item.unitPrice?.toFixed(2) || '0.00'}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-500">Total:</span>
+                          <span className="font-bold text-green-800">${item.totalPrice?.toFixed(2) || '0.00'}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-sm">
-                    <span className="font-medium">MOQ:</span> {item.moq}
-                    {item.quantity >= item.moq ? (
-                      <span className="text-green-600 ml-1">✅</span>
-                    ) : (
-                      <span className="text-yellow-600 ml-1">⚠️</span>
-                    )}
+                  
+                  {/* Confidence Score */}
+                  <div className="bg-slate-50/80 backdrop-blur-sm rounded-lg p-3 border border-slate-200/50">
+                    <div className="text-sm text-slate-600 mb-2">AI Confidence Score</div>
+                    <ConfidenceBar confidence={item.confidence || 0.8} />
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">Confidence:</span>
-                  <ConfidenceBar confidence={item.confidence || 0.8} />
                 </div>
               </div>
             </div>
@@ -299,37 +659,30 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         </div>
       </div>
 
-      {/* Issues Section */}
+      {/* Validation Issues */}
       {hasIssues && (
-        <div className="mb-6 p-4 bg-red-50 rounded-lg">
-          <h3 className="font-semibold text-red-900 mb-3">⚠️ Validation Issues</h3>
-          <div className="space-y-2">
-            {validationResult.issues.map((issue: ValidationIssue, index: number) => (
-              <div key={index} className="flex items-start gap-3 p-3 bg-white rounded border-l-4 border-red-400">
-                <IssueIcon type={issue.type} />
-                <div className="flex-1">
-                  <div className="font-medium text-red-900">{issue.message}</div>
-                                     {issue.suggestedSolution && (
-                     <div className="mt-2">
-                       <div className="text-sm font-medium text-gray-700">💡 Suggestion:</div>
-                       <div className="text-sm text-gray-600 mt-1">
-                         <span className="text-blue-500">→</span> {issue.suggestedSolution}
-                       </div>
-                     </div>
-                   )}
-                   {issue.suggestedProducts && issue.suggestedProducts.length > 0 && (
-                     <div className="mt-2">
-                       <div className="text-sm font-medium text-gray-700">🔄 Alternative Products:</div>
-                       <ul className="text-sm text-gray-600 mt-1 space-y-1">
-                         {issue.suggestedProducts.map((product, idx) => (
-                           <li key={idx} className="flex items-center gap-2">
-                             <span className="text-blue-500">→</span>
-                             {product.Product_Name} ({product.Product_Code}) - ${product.Price}
-                           </li>
-                         ))}
-                       </ul>
-                     </div>
-                   )}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-gradient-to-br from-red-600 to-rose-600 rounded-lg flex items-center justify-center text-white text-sm">
+              ⚠️
+            </div>
+            <h3 className="font-bold text-red-900 text-lg">Validation Issues ({validationResult.issues.length})</h3>
+          </div>
+          
+          <div className="space-y-4">
+            {validationResult.issues.map((issue: any, index: number) => (
+              <div key={index} className="bg-red-50/80 backdrop-blur-sm rounded-xl p-6 border border-red-200/50">
+                <div className="flex items-start gap-4">
+                  <IssueIcon type={issue.type} />
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-red-900 mb-2">{issue.message}</h4>
+                    {issue.suggestion && (
+                      <div className="bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-white/40">
+                        <div className="text-sm text-slate-600 mb-1">💡 Suggestion</div>
+                        <div className="text-slate-800">{issue.suggestion}</div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -338,31 +691,24 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
       )}
 
       {/* Order Total */}
-      <div className="border-t pt-4">
-        <div className="flex justify-between items-center text-lg font-semibold">
-          <span>💰 Total Order Value:</span>
-          <span className="text-2xl text-green-600">${totalPrice.toFixed(2)}</span>
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-2xl">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-xl font-bold mb-2">Order Total</h3>
+            <div className="text-slate-300 text-sm">
+              {totalItems} item{totalItems !== 1 ? 's' : ''} • 
+              {hasIssues ? ` ${validationResult.issues.length} issue${validationResult.issues.length !== 1 ? 's' : ''}` : ' All validated'}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-3xl font-bold text-green-400">
+              ${totalPrice.toFixed(2)}
+            </div>
+            <div className="text-slate-300 text-sm">
+              Total Value
+            </div>
+          </div>
         </div>
-        <div className="text-sm text-gray-600 mt-1">
-          {totalItems} items • {hasIssues ? 'Requires attention' : 'Ready to process'}
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-3 mt-6">
-        <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-          📝 Review & Edit Order
-        </button>
-        <button 
-          className={`flex-1 px-4 py-2 rounded-md transition-colors ${
-            hasIssues 
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-              : 'bg-green-600 text-white hover:bg-green-700'
-          }`}
-          disabled={hasIssues}
-        >
-          {hasIssues ? '⚠️ Resolve Issues First' : '✅ Approve Order'}
-        </button>
       </div>
     </div>
   );

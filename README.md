@@ -66,27 +66,124 @@ The system comes with 5 sample emails from the Zaqathon challenge:
 ## 🏗️ Architecture
 
 ### Tech Stack
-- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Frontend**: React 18, TypeScript, Tailwind CSS, Vite
 - **Backend**: Node.js, Express, TypeScript
 - **AI**: Google Gemini 2.0 Flash API
 - **Data**: CSV product catalog (500+ products)
 - **Search**: Fuse.js for fuzzy product matching
+- **Styling**: Modern glass morphism, gradients, animations
+- **Icons**: Lucide React for consistent iconography
 
-### SOLID Design Principles
+### 📁 Complete Folder Structure
+
 ```
-📁 backend/src/
-├── interfaces/          # Abstractions (Dependency Inversion)
-│   ├── IProductService.ts
-│   ├── IEmailParsingService.ts
-│   └── IValidationService.ts
-├── services/           # Single Responsibility implementations
-│   ├── ProductService.ts
-│   ├── EmailParsingService.ts
-│   ├── ValidationService.ts
-│   ├── OrderProcessingService.ts
-│   └── PDFFormFillerService.ts
-└── controllers/        # Interface Segregation
-    └── OrderController.ts
+zaqahack/
+├── 📁 frontend/                    # React TypeScript Frontend
+│   ├── 📁 public/                  # Static assets
+│   │   ├── vite.svg               # Vite logo
+│   │   └── index.html             # HTML template
+│   ├── 📁 src/                    # Source code
+│   │   ├── 📁 components/         # React components
+│   │   │   ├── EmailInput.tsx     # Email input & sample emails
+│   │   │   └── OrderSummary.tsx   # Order display & export
+│   │   ├── 📁 services/           # API communication
+│   │   │   └── api.ts             # Axios API client
+│   │   ├── App.tsx                # Main app component
+│   │   ├── main.tsx               # React entry point
+│   │   ├── index.css              # Global styles & Tailwind
+│   │   └── vite-env.d.ts          # Vite type definitions
+│   ├── package.json               # Frontend dependencies
+│   ├── tsconfig.json              # TypeScript config
+│   ├── tailwind.config.js         # Tailwind CSS config
+│   └── vite.config.ts             # Vite build config
+│
+├── 📁 backend/                     # Node.js Express Backend
+│   ├── 📁 src/                    # Source code
+│   │   ├── 📁 controllers/        # Request handlers
+│   │   │   └── OrderController.ts # Order processing endpoints
+│   │   ├── 📁 interfaces/         # TypeScript interfaces (SOLID)
+│   │   │   ├── IEmailParsingService.ts    # Email parsing contract
+│   │   │   ├── IProductService.ts         # Product service contract
+│   │   │   └── IValidationService.ts      # Validation contract
+│   │   ├── 📁 services/           # Business logic (SOLID)
+│   │   │   ├── EmailParsingService.ts     # Gemini AI integration
+│   │   │   ├── OrderProcessingService.ts  # Main orchestration
+│   │   │   ├── PDFFormFillerService.ts    # PDF form generation
+│   │   │   ├── ProductService.ts          # Product catalog management
+│   │   │   └── ValidationService.ts       # Order validation logic
+│   │   ├── 📁 routes/             # Express routes
+│   │   │   └── orderRoutes.ts     # API route definitions
+│   │   └── server.ts              # Express server setup
+│   ├── .env.example               # Environment template (secure)
+│   ├── package.json               # Backend dependencies
+│   └── tsconfig.json              # TypeScript config
+│
+├── 📁 shared/                      # Shared TypeScript types
+│   └── 📁 types/                  # Type definitions
+│       ├── index.ts               # Main type exports
+│       └── index.d.ts             # Type declarations
+│
+├── 📁 information/                 # Data & documentation
+│   ├── Product Catalog.csv        # 500+ product database
+│   └── sample-emails/             # Zaqathon test emails
+│       ├── email1-john.txt        # Mixed format order
+│       ├── email2-lena.txt        # Formal business email
+│       ├── email3-carlos.txt      # International customer
+│       ├── email4-fatima.txt      # Urgent delivery
+│       └── email5-yuki.txt        # Japanese customer
+│
+├── .gitignore                     # Git exclusions (security)
+├── package.json                   # Root package config
+├── README.md                      # This documentation
+└── tsconfig.json                  # Root TypeScript config
+```
+
+### 🏛️ SOLID Design Principles Implementation
+
+#### **S** - Single Responsibility Principle
+```typescript
+// Each service has one clear purpose
+EmailParsingService.ts    → AI email parsing only
+ProductService.ts         → Product catalog management only  
+ValidationService.ts      → Order validation logic only
+OrderProcessingService.ts → Orchestrates the full workflow
+```
+
+#### **O** - Open/Closed Principle
+```typescript
+// Services are open for extension, closed for modification
+interface IValidationService {
+  validateOrderItem(item: OrderItem): OrderItem;
+  // Easy to add new validation methods without changing existing code
+}
+```
+
+#### **L** - Liskov Substitution Principle
+```typescript
+// Any implementation can replace the interface
+class EmailParsingService implements IEmailParsingService {
+  // Can be swapped with different AI providers (OpenAI, Claude, etc.)
+}
+```
+
+#### **I** - Interface Segregation Principle
+```typescript
+// Focused, specific interfaces
+IEmailParsingService  → Only email parsing methods
+IProductService      → Only product-related methods  
+IValidationService   → Only validation methods
+```
+
+#### **D** - Dependency Inversion Principle
+```typescript
+// High-level modules depend on abstractions, not concretions
+class OrderProcessingService {
+  constructor(
+    private emailParsingService: IEmailParsingService,    // ← Interface
+    private validationService: IValidationService,        // ← Interface  
+    private productService: IProductService               // ← Interface
+  ) {}
+}
 ```
 
 ## 🎯 Core Deliverables ✅

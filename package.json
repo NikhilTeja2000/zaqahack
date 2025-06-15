@@ -1,0 +1,20 @@
+{
+  "name": "smart-order-intake",
+  "version": "1.0.0",
+  "description": "Smart Order Intake System for Zaqathon Hackathon",
+  "scripts": {
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "backend:dev": "cd backend && npm run dev",
+    "frontend:dev": "cd frontend && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd backend && npm run build && cd ../frontend && npm run build",
+    "start": "cd backend && npm start",
+    "test:setup": "node test-setup.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": ["order-processing", "ai", "email-parsing", "hackathon"],
+  "author": "Zaqathon Team",
+  "license": "MIT"
+} 
